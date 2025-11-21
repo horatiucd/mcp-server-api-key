@@ -16,7 +16,7 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
-    //"x-api-key": id.secret = api-key-id.api-key-secret
+    //"ninja-x-api-key": id.secret
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http,
                                             @Value("${api.key.id}") String apiKeyId,
