@@ -1,5 +1,7 @@
 package com.hcd.mcpserverapikey.config;
 
+import org.springaicommunity.mcp.security.server.apikey.ApiKeyEntity;
+import org.springaicommunity.mcp.security.server.apikey.ApiKeyEntityRepository;
 import org.springaicommunity.mcp.security.server.apikey.memory.ApiKeyEntityImpl;
 import org.springaicommunity.mcp.security.server.apikey.memory.InMemoryApiKeyEntityRepository;
 import org.springaicommunity.mcp.security.server.config.McpApiKeyConfigurer;
@@ -16,23 +18,34 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
-    //"ninja-x-api-key": id.secret
+    @Value("${api.key.id}")
+    private String apiKeyId;
+
+    @Value("${api.key.secret}")
+    private String apiKeySecret;
+
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http,
-                                            @Value("${api.key.id}") String apiKeyId,
-                                            @Value("${api.key.secret}") String apiKeySecret) throws Exception {
-        var apiKey = ApiKeyEntityImpl.builder()
+    ApiKeyEntity apiKey() {
+        return ApiKeyEntityImpl.builder()
                 .name("API key")
                 .id(apiKeyId)
                 .secret(apiKeySecret)
                 .build();
+    }
 
-        var apiKeyRepository = new InMemoryApiKeyEntityRepository<>(List.of(apiKey));
+    @Bean
+    ApiKeyEntityRepository<ApiKeyEntity> apiKeyRepository() {
+        return new InMemoryApiKeyEntityRepository<>(List.of(apiKey()));
+    }
 
-        return http.authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+    //"ninja-x-api-key": id.secret
+    @Bean
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        return http.authorizeHttpRequests(auth ->
+                        auth.anyRequest().authenticated())
                 .with(McpApiKeyConfigurer.mcpServerApiKey(),
                         apiKeyConfig ->
-                                apiKeyConfig.apiKeyRepository(apiKeyRepository)
+                                apiKeyConfig.apiKeyRepository(apiKeyRepository())
                                         .headerName("ninja-x-api-key"))
                 .build();
     }
