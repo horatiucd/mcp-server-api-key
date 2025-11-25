@@ -16,7 +16,7 @@ public class NinjaTools {
     }
 
     @McpTool(name = "get-ninja-character-strengths",
-            description = "Provides the strength of the Ninja character with the provided name")
+            description = "Provides the strength of the Ninja character with the indicated name")
     public NinjaStrengths ninjaStrengths(@McpToolParam(description = "The Ninja character name") String name) {
         return ninjaService.strengthsByName(name);
     }
